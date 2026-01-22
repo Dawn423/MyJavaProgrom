@@ -1,4 +1,4 @@
-package day3;
+package day3.datadeduplication;
 
 // 引入 HashSet 类
 import java.util.HashSet;

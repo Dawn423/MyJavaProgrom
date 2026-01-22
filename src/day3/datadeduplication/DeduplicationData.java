@@ -1,4 +1,4 @@
-package day3;
+package day3.datadeduplication;
 
 import java.util.ArrayList;
 import java.util.HashSet;

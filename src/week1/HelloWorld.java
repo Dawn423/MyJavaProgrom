@@ -1,3 +1,5 @@
+package week1;
+
 public interface HelloWorld {
     void printHelloWorld();
 }

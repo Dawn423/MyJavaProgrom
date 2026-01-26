@@ -1,8 +1,8 @@
-package day2;
+package week1.day2;
 
 /**
  * 薪资结算接口
- * * @author 实习生：付xx、xxx
+ * * @author 实习生：付xx,xxx
  * * @date 2026/1/21
  */
 

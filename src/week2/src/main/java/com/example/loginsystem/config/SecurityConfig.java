@@ -15,7 +15,7 @@ public class SecurityConfig {
         http
             // 禁用 CSRF 保护（仅用于开发环境）
             .csrf(csrf -> csrf.disable())
-            // 允许所有请求访问，使用我们自定义的登录逻辑
+            // 允许所有请求访问
             .authorizeRequests(authorize -> authorize
                 .anyRequest().permitAll()
             )

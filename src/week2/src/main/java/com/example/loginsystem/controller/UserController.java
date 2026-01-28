@@ -1,25 +1,20 @@
 package com.example.loginsystem.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.example.loginsystem.model.User;
 import com.example.loginsystem.storage.UserStorage;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class UserController {
     private final UserStorage userStorage;
-    
-    public UserController() {
-        this.userStorage = UserStorage.getInstance();
+
+    @Autowired
+    public UserController(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     @GetMapping("/user/{id}")
@@ -49,21 +44,21 @@ public class UserController {
         if (userStorage.getUserByUsername(username) != null) {
             return "User already exists with username: " + username;
         }
-        
+
         // 创建新用户并添加到UserStorage
         long newId = userStorage.getNextId();
         User newUser = new User(newId, username, password);
         userStorage.addUser(newUser);
-        
+
         return "User created: " + username + ", Password: " + password;
     }
-    
+
     // 注销账号（支持通过用户名或ID删除）
     @DeleteMapping("/user")
     public String deleteUser(@RequestParam(required = false) String username, @RequestParam(required = false) Long id) {
         boolean deleted = false;
         String message = "";
-        
+
         if (id != null) {
             // 通过ID删除用户
             deleted = userStorage.deleteUserById(id);
@@ -83,7 +78,7 @@ public class UserController {
         } else {
             message = "Failed to delete user: Please provide either username or user ID";
         }
-        
+
         return message;
     }
 }

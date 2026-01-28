@@ -1,3 +1,4 @@
+com\example\loginsystem\repository\UserRepository.class
 com\example\loginsystem\controller\UserController.class
 com\example\loginsystem\LoginSystemApplication.class
 com\example\loginsystem\storage\UserStorage.class

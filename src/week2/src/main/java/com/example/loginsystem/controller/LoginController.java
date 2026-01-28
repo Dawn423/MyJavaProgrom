@@ -1,20 +1,21 @@
 package com.example.loginsystem.controller;
 
+import com.example.loginsystem.model.User;
+import com.example.loginsystem.storage.UserStorage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.example.loginsystem.model.User;
-import com.example.loginsystem.storage.UserStorage;
-
 @Controller
 public class LoginController {
     private final UserStorage userStorage;
-    
-    public LoginController() {
-        this.userStorage = UserStorage.getInstance();
+
+    @Autowired
+    public LoginController(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     // 根路径重定向到登录页
@@ -31,13 +32,13 @@ public class LoginController {
 
     @PostMapping("/login")
     public String processLogin(@RequestParam("username") String username,
-                              @RequestParam("password") String password,
-                              Model model) {
+                               @RequestParam("password") String password,
+                               Model model) {
         // 从UserStorage中验证用户
         User user = userStorage.getUserByUsername(username);
         if (user != null && user.getPassword().equals(password)) {
             model.addAttribute("username", username);
-            model.addAttribute("id", user.getFormattedId()); // 添加格式化的用户ID
+            model.addAttribute("id", user.getFormattedId());
             return "home";
         } else {
             model.addAttribute("error", "用户名或密码错误");
@@ -54,22 +55,21 @@ public class LoginController {
     // 处理注册
     @PostMapping("/register")
     public String processRegister(@RequestParam("username") String username,
-                                @RequestParam("password") String password,
-                                Model model) {
+                                  @RequestParam("password") String password,
+                                  Model model) {
         // 检查用户名是否已存在
         if (userStorage.getUserByUsername(username) != null) {
             model.addAttribute("error", "用户名已存在");
             return "register";
         }
-        
+
         // 创建新用户并添加到UserStorage
         long newId = userStorage.getNextId();
         User newUser = new User(newId, username, password);
         userStorage.addUser(newUser);
 
-        
         // 显示注册成功信息，包含格式化的ID
-        model.addAttribute("success", "注册成功！用户名: " + username + ", 密码: " + password + ", 用户ID: " + newUser.getFormattedId() + "。请点击下方重新登录。");
+        model.addAttribute("success", "注册成功！用户名: " + username + ", 密码: " + password + ", 用户ID: " + newUser.getFormattedId());
         return "register";
     }
 
@@ -79,3 +79,4 @@ public class LoginController {
         return "home";
     }
 }
+

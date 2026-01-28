@@ -1,0 +1,41 @@
+### 说明
+### - 在 IDEA 里打开本文件，每个请求左侧会出现 Run/▶，点击即可发送请求并查看响应
+### - 先确保服务都已启动：
+###   - eureka-server: http://localhost:8761/
+###   - user-service: 端口以 user-service/application.properties 的 server.port 为准
+###   - auth-service: 端口以 auth-service/application.properties 的 server.port 为准
+
+
+### Health - auth-service
+GET http://localhost:8083/auth/health
+
+
+### 注册用户（推荐走 auth-service -> Feign -> user-service）
+POST http://localhost:8083/auth/register
+Content-Type: application/json
+
+{
+  "username": "alice",
+  "password": "123456"
+}
+
+
+### 查询所有用户（直接访问 user-service）
+GET http://localhost:8082/users
+
+
+### 按 id 查询用户（直接访问 user-service）
+GET http://localhost:8082/users/1
+
+
+### 按 username 查询用户（直接访问 user-service）
+GET http://localhost:8082/users/username/alice
+
+
+### 通过 auth-service 按 id 查询用户（auth-service -> Feign -> user-service）
+GET http://localhost:8083/auth/user/1
+
+
+### 通过 auth-service 按 username 查询用户（auth-service -> Feign -> user-service）
+GET http://localhost:8083/auth/user/username/alice
+

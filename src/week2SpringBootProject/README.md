@@ -115,8 +115,8 @@ src/
 
 ```properties
 spring.datasource.url=jdbc:mysql://192.168.133.176:3306/db_member_center_gldjc?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull&serverTimezone=Asia/Shanghai&useSSL=false
-spring.datasource.username=gcj_admin
-spring.datasource.password=
+spring.datasource.username=xxxxxx
+spring.datasource.password=xxxxxxx
 ```
 
 ### 6.2 用户表结构

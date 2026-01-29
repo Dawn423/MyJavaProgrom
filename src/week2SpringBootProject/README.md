@@ -65,9 +65,11 @@ src/
 ### 4.2 用户登录
 
 - 提供登录页面，用户可以输入用户名和密码进行登录
+- 支持"记住我"功能，勾选后关闭浏览器再次访问无需重新登录
 - 验证用户名和密码是否正确
 - 登录成功后跳转到首页，显示用户信息
 - 登录失败时显示错误信息
+- 支持退出登录功能，清除登录状态
 
 ### 4.3 用户查询
 
@@ -86,12 +88,13 @@ src/
 
 | 接口路径 | 方法 | 功能描述 |
 |---------|------|----------|
-| / | GET | 重定向到登录页 |
-| /login | GET | 显示登录页面 |
+| / | GET | 重定向到登录页（已登录则跳转到首页） |
+| /login | GET | 显示登录页面（已登录则跳转到首页） |
 | /login | POST | 处理登录请求 |
 | /register | GET | 显示注册页面 |
 | /register | POST | 处理注册请求 |
-| /home | GET | 显示登录后首页 |
+| /home | GET | 显示登录后首页（未登录则跳转到登录页） |
+| /logout | GET | 退出登录，清除登录状态 |
 
 ### 5.2 RESTful接口
 
@@ -263,7 +266,9 @@ CREATE TABLE users (
 
 - 路径：`/login`
 - 功能：用户输入用户名和密码进行登录
+- 记住我：支持勾选"记住我"选项，设置登录状态的保存时间
 - 错误提示：用户名或密码错误时显示错误信息
+- 自动跳转：已登录用户访问时会自动跳转到首页
 
 ### 11.2 注册页面
 
@@ -275,7 +280,9 @@ CREATE TABLE users (
 ### 11.3 首页
 
 - 路径：`/home`
-- 功能：登录成功后显示的页面，展示用户信息
+- 功能：登录成功后显示的页面，展示用户信息和系统功能
+- 退出登录：提供退出登录按钮，点击后清除登录状态
+- 自动跳转：未登录用户访问时会自动跳转到登录页
 
 ## 12. 代码示例
 
@@ -285,10 +292,25 @@ CREATE TABLE users (
 @PostMapping("/login")
 public String processLogin(@RequestParam("username") String username,
                            @RequestParam("password") String password,
-                           Model model) {
+                           @RequestParam(value = "remember", required = false) String remember,
+                           Model model,
+                           HttpSession session) {
     // 从UserStorage中验证用户
     User user = userStorage.getUserByUsername(username);
     if (user != null && user.getPassword().equals(password)) {
+        // 将用户信息存储到Session中
+        session.setAttribute("username", username);
+        session.setAttribute("id", user.getFormattedId());
+        session.setAttribute("userId", user.getId());
+        
+        // 如果勾选了"记住我"，设置Session的最大不活动时间为7天
+        if ("on".equals(remember)) {
+            session.setMaxInactiveInterval(60 * 60 * 24 * 7); // 7天
+        } else {
+            // 否则设置为默认的30分钟
+            session.setMaxInactiveInterval(60 * 30); // 30分钟
+        }
+        
         model.addAttribute("username", username);
         model.addAttribute("id", user.getFormattedId());
         return "home";
@@ -338,12 +360,25 @@ public String getUser(@PathVariable Long id) {
 }
 ```
 
+### 12.4 退出登录示例
+
+```java
+@GetMapping("/logout")
+public String logout(HttpSession session) {
+    // 清除Session中的用户信息
+    session.invalidate();
+    return "redirect:/login";
+}
+```
+
 ## 13. 总结
 
 本项目是一个功能完整的用户登录系统，采用Spring Boot框架开发，具有以下特点：
 
 - 结构清晰：采用分层架构设计，代码组织合理
 - 功能完善：提供用户注册、登录、查询和管理功能
+- 登录保存：支持"记住我"功能，可设置登录状态的保存时间
+- 智能跳转：根据登录状态自动跳转到相应页面
 - 安全可靠：内置默认账号，支持用户权限管理
 - 技术先进：使用Spring Boot 3.2.0版本，集成最新技术栈
 - 易于扩展：模块化设计，便于功能扩展和维护

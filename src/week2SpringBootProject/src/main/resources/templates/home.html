@@ -184,7 +184,8 @@
                 }
                 
                 fetch(url, {
-                    method: 'DELETE'
+                    method: 'DELETE',
+                    credentials: 'include' // 包含cookie，确保Session信息被传递
                 })
                 .then(response => response.text())
                 .then(data => {
@@ -194,6 +195,10 @@
                     } else {
                         // 注销成功，显示正常信息
                         document.getElementById('deleteResult').innerHTML = '<h4>注销结果:</h4><p>' + data + '</p>';
+                        // 3秒后跳转到登录页面
+                        setTimeout(() => {
+                            window.location.href = '/login';
+                        }, 3000);
                     }
                     // 刷新用户列表
                     getAllUsers();

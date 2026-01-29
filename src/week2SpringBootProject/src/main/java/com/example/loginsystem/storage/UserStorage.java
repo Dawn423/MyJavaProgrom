@@ -1,12 +1,14 @@
 package com.example.loginsystem.storage;
 
-import com.example.loginsystem.model.User;
-import com.example.loginsystem.repository.UserRepository;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.example.loginsystem.model.User;
+import com.example.loginsystem.repository.UserRepository;
+
 import jakarta.annotation.PostConstruct;
-import java.util.List;
 
 @Component
 public class UserStorage {
@@ -48,10 +50,23 @@ public class UserStorage {
         return userRepository.findAll();
     }
 
-    // 获取下一个ID（使用数据库自增ID）
+    // 获取下一个ID（使用最小可用ID）
     public long getNextId() {
-        // 由于使用数据库自增ID，这里可以返回0，实际ID由数据库生成
-        return 0;
+        // 获取所有用户的ID
+        List<User> users = userRepository.findAll();
+        // 创建一个集合存储已使用的ID
+        java.util.Set<Long> usedIds = new java.util.HashSet<>();
+        for (User user : users) {
+            usedIds.add(user.getId());
+        }
+        
+        // 从1开始查找最小的可用ID
+        long nextId = 1;
+        while (usedIds.contains(nextId)) {
+            nextId++;
+        }
+        
+        return nextId;
     }
 
     // 通过用户名删除用户（不允许删除内置账号）

@@ -1,13 +1,16 @@
 package com.example.loginsystem.controller;
 
-import com.example.loginsystem.model.User;
-import com.example.loginsystem.storage.UserStorage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import com.example.loginsystem.model.User;
+import com.example.loginsystem.storage.UserStorage;
+
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class LoginController {
@@ -20,23 +23,46 @@ public class LoginController {
 
     // 根路径重定向到登录页
     @GetMapping("/")
-    public String index() {
+    public String index(HttpSession session) {
+        // 检查Session中是否有用户信息
+        if (session.getAttribute("username") != null) {
+            return "redirect:/home";
+        }
         return "redirect:/login";
     }
 
     // 显示登录页面
     @GetMapping("/login")
-    public String showLoginForm() {
+    public String showLoginForm(HttpSession session) {
+        // 检查Session中是否有用户信息，如果有则直接跳转到首页
+        if (session.getAttribute("username") != null) {
+            return "redirect:/home";
+        }
         return "login";
     }
 
     @PostMapping("/login")
     public String processLogin(@RequestParam("username") String username,
                                @RequestParam("password") String password,
-                               Model model) {
+                               @RequestParam(value = "remember", required = false) String remember,
+                               Model model,
+                               HttpSession session) {
         // 从UserStorage中验证用户
         User user = userStorage.getUserByUsername(username);
         if (user != null && user.getPassword().equals(password)) {
+            // 将用户信息存储到Session中
+            session.setAttribute("username", username);
+            session.setAttribute("id", user.getFormattedId());
+            session.setAttribute("userId", user.getId());
+            
+            // 如果勾选了"记住我"，设置Session的最大不活动时间为7天
+            if ("on".equals(remember)) {
+                session.setMaxInactiveInterval(60 * 60 * 24 * 7); // 7天
+            } else {
+                // 否则设置为默认的30分钟
+                session.setMaxInactiveInterval(60 * 30); // 30分钟
+            }
+            
             model.addAttribute("username", username);
             model.addAttribute("id", user.getFormattedId());
             return "home";
@@ -75,8 +101,25 @@ public class LoginController {
 
     // 显示登录后的首页
     @GetMapping("/home")
-    public String showHomePage() {
+    public String showHomePage(HttpSession session, Model model) {
+        // 检查Session中是否有用户信息，如果没有则重定向到登录页
+        if (session.getAttribute("username") == null) {
+            return "redirect:/login";
+        }
+        // 从Session中获取用户信息
+        String username = (String) session.getAttribute("username");
+        String id = (String) session.getAttribute("id");
+        model.addAttribute("username", username);
+        model.addAttribute("id", id);
         return "home";
+    }
+    
+    // 退出登录
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        // 清除Session中的用户信息
+        session.invalidate();
+        return "redirect:/login";
     }
 }
 

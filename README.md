@@ -281,8 +281,8 @@ mvn spring-boot:run
 1. **数据库配置**：
    - week2SpringCloudDemo项目需要MySQL数据库支持
    - 数据库名称：user_db
-   - 用户名：root
-   - 密码：Fzm423326
+   - 用户名：XXXXXX
+   - 密码：XXXXXX
 
 2. **邮件配置**：
    - week2SpringCloudDemo项目的auth-service需要配置QQ邮箱SMTP服务

@@ -2,4 +2,5 @@ C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringCloudDemo\auth-service
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringCloudDemo\auth-service\src\main\java\com\example\authservice\controller\AuthController.java
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringCloudDemo\auth-service\src\main\java\com\example\authservice\model\User.java
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringCloudDemo\auth-service\src\main\java\com\example\authservice\config\SecurityConfig.java
+C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringCloudDemo\auth-service\src\main\java\com\example\authservice\service\EmailService.java
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringCloudDemo\auth-service\src\main\java\com\example\authservice\client\UserServiceClient.java

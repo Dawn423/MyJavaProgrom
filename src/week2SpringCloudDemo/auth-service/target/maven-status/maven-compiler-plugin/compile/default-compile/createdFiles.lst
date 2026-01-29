@@ -1,5 +1,6 @@
 com\example\authservice\config\SecurityConfig.class
-com\example\authservice\controller\AuthController.class
 com\example\authservice\client\UserServiceClient.class
 com\example\authservice\AuthServiceApplication.class
 com\example\authservice\model\User.class
+com\example\authservice\controller\AuthController.class
+com\example\authservice\service\EmailService.class

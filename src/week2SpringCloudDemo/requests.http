@@ -11,12 +11,13 @@ GET http://localhost:8083/auth/health
 
 
 ### 注册用户（推荐走 auth-service -> Feign -> user-service）
-POST http://localhost:8083/auth/register
+POST http://localhost:8084/auth/register
 Content-Type: application/json
 
 {
   "username": "alice",
-  "password": "123456"
+  "password": "123456",
+  "email": "a23_0903@qq.com"
 }
 
 

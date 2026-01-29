@@ -27,7 +27,7 @@ public class SecurityConfig {
             .httpBasic(httpBasic -> httpBasic.disable())
             // 配置会话管理
             .sessionManagement(session -> session
-                // 允许并发会话数
+                // 允许并发会话数，同一账号只能在一处登录
                 .maximumSessions(1)
                 // 会话过期后跳转到登录页
                 .expiredUrl("/login")
@@ -46,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public LogoutSuccessHandler logoutSuccessHandler() {
         SimpleUrlLogoutSuccessHandler handler = new SimpleUrlLogoutSuccessHandler();
-        handler.setDefaultTargetUrl("/login");
+        handler.setDefaultTargetUrl("/login");   // 登出成功后，强制跳转到登录页
         return handler;
     }
 }

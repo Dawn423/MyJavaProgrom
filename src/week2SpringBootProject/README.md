@@ -9,6 +9,7 @@
 - 简单易用的用户注册和登录功能
 - 内置默认管理员账号
 - 支持用户信息查询和管理
+- 智能ID管理：用户注销后，新注册用户使用最小的可用ID，保持ID连续排序
 - 采用分层架构设计，代码结构清晰
 - 使用Spring Boot 3.2.0版本，集成最新技术栈
 
@@ -60,7 +61,8 @@ src/
 
 - 提供注册页面，用户可以输入用户名和密码进行注册
 - 检查用户名是否已存在，确保用户名唯一性
-- 注册成功后显示成功信息
+- 智能ID分配：使用最小的可用ID，保持用户ID连续排序
+- 注册成功后显示成功信息，包含用户ID
 
 ### 4.2 用户登录
 
@@ -80,6 +82,8 @@ src/
 ### 4.4 用户管理
 
 - 支持通过用户名或ID删除用户
+- 只能注销当前登录的账号，无法注销其他用户的账号
+- 注销成功后自动清除登录状态并跳转到登录页面
 - 内置账号（Dawn）不可删除，确保系统安全
 
 ## 5. API接口
@@ -103,7 +107,7 @@ src/
 | /user/{id} | GET | 根据ID查询用户 | id: 用户ID | 用户信息或未找到提示 |
 | /users | GET | 查询所有用户 | 无 | 用户列表 |
 | /user | POST | 创建新用户 | username: 用户名<br>password: 密码 | 创建结果 |
-| /user | DELETE | 删除用户 | username: 用户名（可选）<br>id: 用户ID（可选） | 删除结果 |
+| /user | DELETE | 删除用户 | username: 用户名（可选）<br>id: 用户ID（可选） | 删除结果（只能删除当前登录的账号，成功后自动跳转到登录页面） |
 
 ## 6. 数据库设计
 
@@ -119,7 +123,7 @@ spring.datasource.password=
 
 | 字段名 | 数据类型 | 约束 | 描述 |
 |-------|---------|------|------|
-| id | BIGINT | PRIMARY KEY, AUTO_INCREMENT | 用户ID |
+| id | BIGINT | PRIMARY KEY | 用户ID（由代码管理，保持连续排序） |
 | username | VARCHAR(255) | UNIQUE, NOT NULL | 用户名 |
 | password | VARCHAR(255) | NOT NULL | 密码 |
 
@@ -130,7 +134,6 @@ spring.datasource.password=
 @Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(name = "username", unique = true, nullable = false)
@@ -246,7 +249,7 @@ spring.jpa.hibernate.ddl-auto=none
 
 ```sql
 CREATE TABLE users (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL
 );
@@ -379,6 +382,7 @@ public String logout(HttpSession session) {
 - 功能完善：提供用户注册、登录、查询和管理功能
 - 登录保存：支持"记住我"功能，可设置登录状态的保存时间
 - 智能跳转：根据登录状态自动跳转到相应页面
+- 智能ID管理：用户注销后，新注册用户使用最小的可用ID，保持ID连续排序
 - 安全可靠：内置默认账号，支持用户权限管理
 - 技术先进：使用Spring Boot 3.2.0版本，集成最新技术栈
 - 易于扩展：模块化设计，便于功能扩展和维护

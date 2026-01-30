@@ -3,5 +3,6 @@ C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringBootProject\src\main\j
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringBootProject\src\main\java\com\example\loginsystem\config\SecurityConfig.java
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringBootProject\src\main\java\com\example\loginsystem\model\User.java
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringBootProject\src\main\java\com\example\loginsystem\controller\UserController.java
+C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringBootProject\src\main\java\com\example\loginsystem\service\EmailService.java
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringBootProject\src\main\java\com\example\loginsystem\storage\UserStorage.java
 C:\Users\fuzm-a\IdeaProjects\MyJavaProgrom\src\week2SpringBootProject\src\main\java\com\example\loginsystem\controller\LoginController.java

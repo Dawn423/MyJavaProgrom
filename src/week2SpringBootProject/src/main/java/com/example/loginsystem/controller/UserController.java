@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.loginsystem.model.User;
+import com.example.loginsystem.service.EmailService;
 import com.example.loginsystem.storage.UserStorage;
 
 import jakarta.servlet.http.HttpSession;
@@ -19,10 +20,12 @@ import jakarta.servlet.http.HttpSession;
 @RestController
 public class UserController {
     private final UserStorage userStorage;
+    private final EmailService emailService;
 
     @Autowired
-    public UserController(UserStorage userStorage) {
+    public UserController(UserStorage userStorage, EmailService emailService) {
         this.userStorage = userStorage;
+        this.emailService = emailService;
     }
 
     @GetMapping("/user/{id}")
@@ -81,8 +84,21 @@ public class UserController {
             } else if (!userToDelete.getUsername().equals(currentUsername)) {
                 message = "Failed to delete user with ID: " + String.format("%06d", id) + " (you can only delete your own account)";
             } else {
+                // 保存用户信息，用于发送邮件
+                String userEmail = userToDelete.getEmail();
+                String userToDeleteUsername = userToDelete.getUsername();
+                String userFormattedId = userToDelete.getFormattedId();
+                
                 deleted = userStorage.deleteUserById(id);
                 if (deleted) {
+                    // 发送注销成功邮件
+                    try {
+                        emailService.sendDeactivationEmail(userEmail, userToDeleteUsername, userFormattedId);
+                    } catch (Exception e) {
+                        // 邮件发送失败，记录错误但不影响注销流程
+                        System.err.println("Failed to send deactivation email: " + e.getMessage());
+                    }
+                    
                     // 清除Session
                     session.invalidate();
                     message = "User deleted successfully with ID: " + String.format("%06d", id) + " (you will be redirected to login page)";
@@ -95,13 +111,30 @@ public class UserController {
             if (!username.equals(currentUsername)) {
                 message = "Failed to delete user: " + username + " (you can only delete your own account)";
             } else {
-                deleted = userStorage.deleteUser(username);
-                if (deleted) {
-                    // 清除Session
-                    session.invalidate();
-                    message = "User deleted successfully: " + username + " (you will be redirected to login page)";
+                // 获取用户信息，用于发送邮件
+                User userToDelete = userStorage.getUserByUsername(username);
+                if (userToDelete != null) {
+                    String userEmail = userToDelete.getEmail();
+                    String userFormattedId = userToDelete.getFormattedId();
+                    
+                    deleted = userStorage.deleteUser(username);
+                    if (deleted) {
+                        // 发送注销成功邮件
+                        try {
+                            emailService.sendDeactivationEmail(userEmail, username, userFormattedId);
+                        } catch (Exception e) {
+                            // 邮件发送失败，记录错误但不影响注销流程
+                            System.err.println("Failed to send deactivation email: " + e.getMessage());
+                        }
+                        
+                        // 清除Session
+                        session.invalidate();
+                        message = "User deleted successfully: " + username + " (you will be redirected to login page)";
+                    } else {
+                        message = "Failed to delete user: " + username + " (cannot delete built-in account)";
+                    }
                 } else {
-                    message = "Failed to delete user: " + username + " (cannot delete built-in account)";
+                    message = "Failed to delete user: " + username + " (user not found)";
                 }
             }
         } else {

@@ -25,7 +25,7 @@ public class UserStorage {
         // 检查是否已存在内置账号
         if (userRepository.findByUsername("Dawn") == null) {
             // 添加内置账号
-            User dawn = new User(1L, "Dawn", "666666");
+            User dawn = new User(1L, "Dawn", "666666", "dawn@example.com");
             userRepository.save(dawn);
         }
     }
@@ -38,6 +38,11 @@ public class UserStorage {
     // 通过用户名获取用户
     public User getUserByUsername(String username) {
         return userRepository.findByUsername(username);
+    }
+
+    // 通过邮箱获取用户
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     // 通过ID获取用户

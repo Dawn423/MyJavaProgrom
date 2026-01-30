@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.example.loginsystem.model.User;
+import com.example.loginsystem.service.EmailService;
 import com.example.loginsystem.storage.UserStorage;
 
 import jakarta.servlet.http.HttpSession;
@@ -15,10 +16,12 @@ import jakarta.servlet.http.HttpSession;
 @Controller
 public class LoginController {
     private final UserStorage userStorage;
+    private final EmailService emailService;
 
     @Autowired
-    public LoginController(UserStorage userStorage) {
+    public LoginController(UserStorage userStorage, EmailService emailService) {
         this.userStorage = userStorage;
+        this.emailService = emailService;
     }
 
     // 根路径重定向到登录页
@@ -82,20 +85,35 @@ public class LoginController {
     @PostMapping("/register")
     public String processRegister(@RequestParam("username") String username,
                                   @RequestParam("password") String password,
+                                  @RequestParam("email") String email,
                                   Model model) {
         // 检查用户名是否已存在
         if (userStorage.getUserByUsername(username) != null) {
             model.addAttribute("error", "用户名已存在");
             return "register";
         }
+        
+        // 检查邮箱是否已存在
+        if (userStorage.getUserByEmail(email) != null) {
+            model.addAttribute("error", "邮箱已存在");
+            return "register";
+        }
 
         // 创建新用户并添加到UserStorage
         long newId = userStorage.getNextId();
-        User newUser = new User(newId, username, password);
+        User newUser = new User(newId, username, password, email);
         userStorage.addUser(newUser);
 
+        // 发送注册成功邮件
+        try {
+            emailService.sendRegistrationEmail(email, username, newUser.getFormattedId());
+        } catch (Exception e) {
+            // 邮件发送失败，记录错误但不影响注册流程
+            System.err.println("Failed to send registration email: " + e.getMessage());
+        }
+
         // 显示注册成功信息，包含格式化的ID
-        model.addAttribute("success", "注册成功！用户名: " + username + ", 密码: " + password + ", 用户ID: " + newUser.getFormattedId());
+        model.addAttribute("success", "注册成功！用户名: " + username + ", 密码: " + password + ", 用户ID: " + newUser.getFormattedId() + ", 邮件已发送到: " + email);
         return "register";
     }
 

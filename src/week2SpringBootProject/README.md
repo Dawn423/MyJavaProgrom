@@ -21,6 +21,7 @@
 | Spring Web | - | Web开发 |
 | Spring Security | - | 安全认证 |
 | Spring Data JPA | - | 数据访问 |
+| Spring Mail | - | 邮件发送 |
 | Thymeleaf | - | 模板引擎 |
 | MySQL | - | 数据库 |
 | Java | 17 | 开发语言 |
@@ -43,6 +44,8 @@ src/
 │   │               │   └── User.java
 │   │               ├── repository/       # 数据访问层
 │   │               │   └── UserRepository.java
+│   │               ├── service/          # 服务类
+│   │               │   └── EmailService.java
 │   │               ├── storage/          # 存储服务
 │   │               │   └── UserStorage.java
 │   │               └── LoginSystemApplication.java  # 应用入口
@@ -59,10 +62,12 @@ src/
 
 ### 4.1 用户注册
 
-- 提供注册页面，用户可以输入用户名和密码进行注册
+- 提供注册页面，用户可以输入用户名、密码和邮箱进行注册
 - 检查用户名是否已存在，确保用户名唯一性
+- 检查邮箱是否已存在，确保邮箱唯一性
 - 智能ID分配：使用最小的可用ID，保持用户ID连续排序
-- 注册成功后显示成功信息，包含用户ID
+- 注册成功后显示成功信息，包含用户ID和邮箱
+- 注册成功后自动发送注册确认邮件到用户邮箱
 
 ### 4.2 用户登录
 
@@ -84,6 +89,7 @@ src/
 - 支持通过用户名或ID删除用户
 - 只能注销当前登录的账号，无法注销其他用户的账号
 - 注销成功后自动清除登录状态并跳转到登录页面
+- 注销成功后自动发送注销确认邮件到用户邮箱
 - 内置账号（Dawn）不可删除，确保系统安全
 
 ## 5. API接口
@@ -126,6 +132,7 @@ spring.datasource.password=xxxxxxx
 | id | BIGINT | PRIMARY KEY | 用户ID（由代码管理，保持连续排序） |
 | username | VARCHAR(255) | UNIQUE, NOT NULL | 用户名 |
 | password | VARCHAR(255) | NOT NULL | 密码 |
+| email | VARCHAR(255) | UNIQUE, NOT NULL | 邮箱地址 |
 
 ### 6.3 实体类
 
@@ -142,7 +149,56 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
     
-    // 构造方法、getter和setter方法
+    @Column(name = "email", unique = true, nullable = false)
+    private String email;
+    
+    public User() {
+    }
+    
+    public User(Long id, String username, String password) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+    }
+    
+    public User(Long id, String username, String password, String email) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+    }
+    
+    public Long getId() {
+        return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public String getUsername() {
+        return username;
+    }
+    
+    public void setUsername(String username) {
+        this.username = username;
+    }
+    
+    public String getPassword() {
+        return password;
+    }
+    
+    public void setPassword(String password) {
+        this.password = password;
+    }
+    
+    public String getEmail() {
+        return email;
+    }
+    
+    public void setEmail(String email) {
+        this.email = email;
+    }
     
     // 获取格式化的6位数字ID字符串
     public String getFormattedId() {
@@ -173,9 +229,15 @@ public class User {
 
 #### UserRepository
 
-继承自JpaRepository，提供基本的数据访问方法，如保存用户、根据用户名查找用户、根据ID查找用户和获取所有用户。
+继承自JpaRepository，提供基本的数据访问方法，如保存用户、根据用户名查找用户、根据邮箱查找用户、根据ID查找用户和获取所有用户。
 
-### 7.4 安全配置
+### 7.4 服务类
+
+#### EmailService
+
+提供邮件发送服务，包括发送注册成功邮件和注销成功邮件的功能。使用Spring Mail发送邮件，配置在application.properties文件中。
+
+### 7.5 安全配置
 
 #### SecurityConfig
 
@@ -224,6 +286,23 @@ spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.Im
 spring.jpa.hibernate.ddl-auto=none
 ```
 
+### 8.6 邮件配置
+
+```properties
+# Mail Configuration
+spring.mail.host=smtp.qq.com
+spring.mail.port=587
+spring.mail.username=your-email@qq.com
+spring.mail.password=your-email-password
+spring.mail.properties.mail.smtp.auth=true
+spring.mail.properties.mail.smtp.starttls.enable=true
+spring.mail.properties.mail.smtp.starttls.required=true
+
+# Application Email Settings
+app.email.from=your-email@qq.com
+app.email.subject=Registration Successful
+```
+
 ## 9. 内置账号
 
 系统启动时会自动初始化一个内置账号：
@@ -231,6 +310,7 @@ spring.jpa.hibernate.ddl-auto=none
 - 用户名：Dawn
 - 密码：666666
 - 用户ID：1
+- 邮箱：dawn@example.com
 
 此账号为系统默认管理员账号，不可删除。
 
@@ -251,7 +331,8 @@ spring.jpa.hibernate.ddl-auto=none
 CREATE TABLE users (
     id BIGINT PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL
+    password VARCHAR(255) NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL
 );
 ```
 
@@ -259,9 +340,10 @@ CREATE TABLE users (
 
 1. 克隆项目到本地
 2. 配置数据库连接信息（application.properties）
-3. 执行Maven构建：`mvn clean install`
-4. 运行应用：`mvn spring-boot:run`
-5. 访问系统：`http://localhost:8080`
+3. 配置邮件发送信息（application.properties），包括SMTP服务器地址、端口、用户名、密码等
+4. 执行Maven构建：`mvn clean install`
+5. 运行应用：`mvn spring-boot:run`
+6. 访问系统：`http://localhost:8080`
 
 ## 11. 页面说明
 
@@ -276,9 +358,10 @@ CREATE TABLE users (
 ### 11.2 注册页面
 
 - 路径：`/register`
-- 功能：用户输入用户名和密码进行注册
-- 错误提示：用户名已存在时显示错误信息
-- 成功提示：注册成功时显示成功信息，包含用户ID
+- 功能：用户输入用户名、密码和邮箱进行注册
+- 错误提示：用户名或邮箱已存在时显示错误信息
+- 成功提示：注册成功时显示成功信息，包含用户ID和邮箱
+- 邮件发送：注册成功后自动发送注册确认邮件到用户邮箱
 
 ### 11.3 首页
 
@@ -383,6 +466,7 @@ public String logout(HttpSession session) {
 - 登录保存：支持"记住我"功能，可设置登录状态的保存时间
 - 智能跳转：根据登录状态自动跳转到相应页面
 - 智能ID管理：用户注销后，新注册用户使用最小的可用ID，保持ID连续排序
+- 邮件通知：用户注册和注销时自动发送邮件通知
 - 安全可靠：内置默认账号，支持用户权限管理
 - 技术先进：使用Spring Boot 3.2.0版本，集成最新技术栈
 - 易于扩展：模块化设计，便于功能扩展和维护

@@ -14,7 +14,7 @@ public class EmailService {
     public void sendRegistrationSuccessEmail(String toEmail, String username) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("a23_0903@qq.com");
+            message.setFrom("x");
             message.setTo(toEmail);
             message.setSubject("注册成功 - 欢迎使用我们的服务");
             message.setText("亲爱的 " + username + "，\n\n" +

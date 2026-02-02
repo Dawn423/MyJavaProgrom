@@ -9,6 +9,7 @@ MyJavaProgrom 是一个综合性的Java学习项目，包含了从基础Java语�
 ```
 MyJavaProgrom/
 ├── MavenLearning/                # Maven学习项目
+├── email-service/                # 邮件发送微服务项目
 ├── src/
 │   ├── week1/                    # 第一周：Java基础练习
 │   │   ├── day1/                 # 第一天：基础语法练习
@@ -39,7 +40,41 @@ MyJavaProgrom/
 - `src/test/java/org/example/AppTest.java` - 测试类
 - `pom.xml` - Maven项目配置文件
 
-### 2. week1 (Java基础练习)
+### 2. email-service (邮件发送微服务)
+
+**功能**：基于Spring Boot的邮件发送微服务，集成了Spring Cloud Eureka客户端，实现邮件发送和服务注册功能。
+
+**结构**：
+- `src/main/java/com/example/emailservice/`
+  - `EmailServiceApplication.java` - 应用主类
+  - `controller/EmailController.java` - 邮件控制器
+  - `model/EmailRequest.java` - 邮件请求模型
+  - `service/EmailService.java` - 邮件服务
+- `src/main/resources/application.properties` - 应用配置
+- `pom.xml` - Maven配置
+
+**技术栈**：
+- Spring Boot 3.2.0
+- Spring Cloud 2023.0.0
+- Spring Cloud Netflix Eureka Client
+- Spring Boot Starter Mail
+- Spring Web
+
+**功能特性**：
+- 支持发送普通邮件、注册模板邮件和通知模板邮件
+- 自动注册到Eureka服务注册中心
+- 提供健康检查接口
+- 邮件发送失败时提供详细错误信息
+
+**API接口**：
+- `GET /email/health` - 健康检查
+- `POST /email/send` - 发送普通邮件
+- `POST /email/send-template/registration` - 发送注册模板邮件
+- `POST /email/send-template/notification` - 发送通知模板邮件
+
+**运行端口**：8085
+
+### 3. week1 (Java基础练习)
 
 **功能**：Java基础语法和核心概念练习，包含三天的学习内容。
 
@@ -138,15 +173,15 @@ MyJavaProgrom/
 |---------|---------|------|----------|
 | 基础语言 | Java | 17+ | 所有模块 |
 | 构建工具 | Maven | 3.8+ | 所有模块 |
-| Web框架 | Spring Boot | 3.2.0 | week2SpringBootProject, week2SpringCloudDemo |
-| 微服务框架 | Spring Cloud | 2023.0.0 | week2SpringCloudDemo |
-| 服务注册 | Eureka | - | week2SpringCloudDemo |
+| Web框架 | Spring Boot | 3.2.0 | week2SpringBootProject, week2SpringCloudDemo, email-service |
+| 微服务框架 | Spring Cloud | 2023.0.0 | week2SpringCloudDemo, email-service |
+| 服务注册 | Eureka | - | week2SpringCloudDemo, email-service |
 | REST客户端 | Feign | - | week2SpringCloudDemo |
 | 安全框架 | Spring Security | - | week2SpringBootProject, week2SpringCloudDemo |
 | ORM框架 | Spring Data JPA | - | week2SpringCloudDemo |
 | 模板引擎 | Thymeleaf | - | week2SpringBootProject |
 | 数据库 | MySQL | 8.0+ | week2SpringCloudDemo |
-| 邮件服务 | Spring Boot Starter Mail | - | week2SpringCloudDemo |
+| 邮件服务 | Spring Boot Starter Mail | - | week2SpringCloudDemo, email-service |
 
 ## 运行指南
 
@@ -215,6 +250,32 @@ mvn spring-boot:run
 # 服务端口：8084
 ```
 
+### 4. 运行 email-service
+
+#### 4.1 前提条件
+- 已启动 Eureka Server（见 3.1 步骤）
+- 已配置 QQ 邮箱授权码
+
+#### 4.2 配置邮件服务
+- 打开 `email-service/src/main/resources/application.properties`
+- 将 `spring.mail.username` 改为你的 QQ 邮箱
+- 将 `spring.mail.password` 改为你的 QQ 邮箱授权码
+
+#### 4.3 启动 Email Service
+
+```bash
+# 进入目录
+cd email-service
+
+# 启动服务
+mvn spring-boot:run
+
+# 服务端口：8085
+```
+
+#### 4.4 验证服务注册
+在 Eureka 控制台（http://localhost:8761）中，确认 `EMAIL-SERVICE` 已经成功注册。
+
 ## 服务API说明
 
 ### week2SpringBootProject API
@@ -257,6 +318,15 @@ mvn spring-boot:run
 | `/auth/health` | GET | 健康检查 |
 | `/auth/user/{id}` | DELETE | 根据ID删除用户（调用User Service） |
 | `/auth/user` | DELETE | 根据用户名删除用户（调用User Service，使用username查询参数） |
+
+### email-service API
+
+| 路径 | 方法 | 功能 |
+|------|------|------|
+| `/email/health` | GET | 健康检查 |
+| `/email/send` | POST | 发送普通邮件（需要to、subject、text参数） |
+| `/email/send-template/registration` | POST | 发送注册模板邮件（需要to参数） |
+| `/email/send-template/notification` | POST | 发送通知模板邮件（需要to参数，subject和text可选） |
 
 ## 学习路径建议
 

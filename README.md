@@ -9,8 +9,8 @@ MyJavaProgrom 是一个综合性的Java学习项目，包含了从基础Java语�
 ```
 MyJavaProgrom/
 ├── MavenLearning/                # Maven学习项目
-├── email-service/                # 邮件发送微服务项目
 ├── src/
+│   ├── email-service/            # 邮件发送微服务项目
 │   ├── week1/                    # 第一周：Java基础练习
 │   │   ├── day1/                 # 第一天：基础语法练习
 │   │   ├── day2/                 # 第二天：面向对象编程
@@ -45,13 +45,13 @@ MyJavaProgrom/
 **功能**：基于Spring Boot的邮件发送微服务，集成了Spring Cloud Eureka客户端，实现邮件发送和服务注册功能。
 
 **结构**：
-- `src/main/java/com/example/emailservice/`
+- `src/email-service/src/main/java/com/example/emailservice/`
   - `EmailServiceApplication.java` - 应用主类
   - `controller/EmailController.java` - 邮件控制器
   - `model/EmailRequest.java` - 邮件请求模型
   - `service/EmailService.java` - 邮件服务
-- `src/main/resources/application.properties` - 应用配置
-- `pom.xml` - Maven配置
+- `src/email-service/src/main/resources/application.properties` - 应用配置
+- `src/email-service/pom.xml` - Maven配置
 
 **技术栈**：
 - Spring Boot 3.2.0
@@ -257,7 +257,7 @@ mvn spring-boot:run
 - 已配置 QQ 邮箱授权码
 
 #### 4.2 配置邮件服务
-- 打开 `email-service/src/main/resources/application.properties`
+- 打开 `src/email-service/src/main/resources/application.properties`
 - 将 `spring.mail.username` 改为你的 QQ 邮箱
 - 将 `spring.mail.password` 改为你的 QQ 邮箱授权码
 
@@ -265,7 +265,7 @@ mvn spring-boot:run
 
 ```bash
 # 进入目录
-cd email-service
+cd src/email-service
 
 # 启动服务
 mvn spring-boot:run

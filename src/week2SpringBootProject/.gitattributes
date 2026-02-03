@@ -1,0 +1,2 @@
+path/to/large/file filter=lfs diff=lfs merge=lfs -text
+target/login-system-1.0-SNAPSHOT.jar filter=lfs diff=lfs merge=lfs -text

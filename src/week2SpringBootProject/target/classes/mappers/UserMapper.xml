@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.loginsystem.mapper.UserMapper">
+    <!-- 配置二级缓存 -->
+    <cache
+        eviction="LRU"
+        flushInterval="60000"
+        size="1024"
+        readOnly="false"/>
+    <resultMap id="UserMap" type="User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="password" property="password"/>
+        <result column="email" property="email"/>
+        <result column="role_id" property="roleId"/>
+    </resultMap>
+
+    <!-- 用户与角色关联查询的结果映射 -->
+    <resultMap id="UserWithRoleMap" type="User" extends="UserMap">
+        <association property="role" javaType="Role">
+            <id column="role_id" property="id"/>
+            <result column="role_name" property="name"/>
+            <result column="role_description" property="description"/>
+        </association>
+    </resultMap>
+
+    <insert id="insert" parameterType="User">
+        INSERT INTO users (id, username, password, email, role_id)
+        VALUES (#{id}, #{username}, #{password}, #{email}, #{roleId})
+    </insert>
+
+    <select id="findByUsername" resultMap="UserMap" parameterType="String">
+        SELECT * FROM users WHERE username = #{username}
+    </select>
+
+    <select id="findByEmail" resultMap="UserMap" parameterType="String">
+        SELECT * FROM users WHERE email = #{email}
+    </select>
+
+    <select id="findById" resultMap="UserMap" parameterType="Long">
+        SELECT * FROM users WHERE id = #{id}
+    </select>
+
+    <select id="findAll" resultMap="UserMap">
+        SELECT * FROM users
+    </select>
+
+    <delete id="delete" parameterType="User">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+    <update id="update" parameterType="User">
+        UPDATE users
+        SET username = #{username}, password = #{password}, email = #{email}, role_id = #{roleId}
+        WHERE id = #{id}
+    </update>
+
+    <!-- 用户与角色关联查询 -->
+    <select id="findUserWithRole" resultMap="UserWithRoleMap" parameterType="Long">
+        SELECT u.*, r.name as role_name, r.description as role_description
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+        WHERE u.id = #{id}
+    </select>
+
+    <!-- 所有用户与角色关联查询 -->
+    <select id="findAllUsersWithRole" resultMap="UserWithRoleMap">
+        SELECT u.*, r.name as role_name, r.description as role_description
+        FROM users u
+        LEFT JOIN roles r ON u.role_id = r.id
+    </select>
+
+    <!-- 动态SQL查询 -->
+    <select id="findUsersByCondition" resultMap="UserMap">
+        SELECT * FROM users
+        <where>
+            <if test="username != null and username != ''">
+                AND username LIKE CONCAT('%', #{username}, '%')
+            </if>
+            <if test="email != null and email != ''">
+                AND email LIKE CONCAT('%', #{email}, '%')
+            </if>
+        </where>
+    </select>
+</mapper>

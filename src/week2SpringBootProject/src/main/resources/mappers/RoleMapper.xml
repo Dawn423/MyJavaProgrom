@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.loginsystem.mapper.RoleMapper">
+    <!-- 配置二级缓存 -->
+    <cache
+        eviction="LRU"
+        flushInterval="60000"
+        size="1024"
+        readOnly="false"/>
+
+    <resultMap id="RoleMap" type="Role">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="description" property="description"/>
+    </resultMap>
+
+    <insert id="insert" parameterType="Role">
+        INSERT INTO roles (id, name, description)
+        VALUES (#{id}, #{name}, #{description})
+    </insert>
+
+    <select id="findById" resultMap="RoleMap" parameterType="Long">
+        SELECT * FROM roles WHERE id = #{id}
+    </select>
+
+    <select id="findByName" resultMap="RoleMap" parameterType="String">
+        SELECT * FROM roles WHERE name = #{name}
+    </select>
+
+    <select id="findAll" resultMap="RoleMap">
+        SELECT * FROM roles
+    </select>
+
+    <update id="update" parameterType="Role">
+        UPDATE roles
+        SET name = #{name}, description = #{description}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Long">
+        DELETE FROM roles WHERE id = #{id}
+    </delete>
+</mapper>

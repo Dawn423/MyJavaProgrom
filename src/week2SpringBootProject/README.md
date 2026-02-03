@@ -21,6 +21,8 @@
 | Spring Web | - | Web开发 |
 | Spring Security | - | 安全认证 |
 | Spring Data JPA | - | 数据访问 |
+| MyBatis | 3.5.14 | 数据访问（高级特性） |
+| MyBatis Spring Boot Starter | 3.0.3 | MyBatis与Spring Boot集成 |
 | Spring Mail | - | 邮件发送 |
 | Thymeleaf | - | 模板引擎 |
 | MySQL | - | 数据库 |
@@ -41,19 +43,27 @@ src/
 │   │               │   ├── LoginController.java
 │   │               │   └── UserController.java
 │   │               ├── model/            # 模型类
-│   │               │   └── User.java
+│   │               │   ├── User.java
+│   │               │   └── Role.java
+│   │               ├── mapper/           # MyBatis映射器
+│   │               │   ├── UserMapper.java
+│   │               │   └── RoleMapper.java
 │   │               ├── repository/       # 数据访问层
 │   │               │   └── UserRepository.java
 │   │               ├── service/          # 服务类
 │   │               │   └── EmailService.java
 │   │               ├── storage/          # 存储服务
-│   │               │   └── UserStorage.java
+│   │               │   ├── UserStorage.java
+│   │               │   └── RoleStorage.java
 │   │               └── LoginSystemApplication.java  # 应用入口
 │   └── resources/
 │       ├── templates/                    # 前端模板
 │       │   ├── home.html
 │       │   ├── login.html
 │       │   └── register.html
+│       ├── mappers/                      # MyBatis SQL映射文件
+│       │   ├── UserMapper.xml
+│       │   └── RoleMapper.xml
 │       └── application.properties        # 应用配置
 └── pom.xml                               # Maven配置
 ```
@@ -91,6 +101,20 @@ src/
 - 注销成功后自动清除登录状态并跳转到登录页面
 - 注销成功后自动发送注销确认邮件到用户邮箱
 - 内置账号（Dawn）不可删除，确保系统安全
+
+### 4.5 角色管理
+
+- 支持角色的增删改查操作
+- 内置两个默认角色：ADMIN（管理员）和USER（普通用户）
+- 内置账号Dawn默认分配ADMIN角色
+- 支持为用户分配不同的角色
+- 角色信息与用户信息关联存储
+
+### 4.6 MyBatis高级特性
+
+- **动态SQL查询**：支持根据条件动态生成SQL语句，实现灵活的查询功能
+- **二级缓存**：配置了基于Mapper级别的二级缓存，提高查询性能
+- **关联查询**：支持用户与角色的关联查询，一次查询获取完整信息
 
 ## 5. API接口
 
@@ -133,13 +157,24 @@ spring.datasource.password=xxxxxxx
 | username | VARCHAR(255) | UNIQUE, NOT NULL | 用户名 |
 | password | VARCHAR(255) | NOT NULL | 密码 |
 | email | VARCHAR(255) | UNIQUE, NOT NULL | 邮箱地址 |
+| role_id | BIGINT | | 角色ID，关联到roles表的id字段 |
+
+### 6.3 角色表结构
+
+| 字段名 | 数据类型 | 约束 | 描述 |
+|-------|---------|------|------|
+| id | BIGINT | PRIMARY KEY | 角色ID |
+| name | VARCHAR(255) | UNIQUE, NOT NULL | 角色名称 |
+| description | VARCHAR(255) | | 角色描述 |
 
 ### 6.3 实体类
+
+#### User实体类
 
 ```java
 @Entity
 @Table(name = "users")
-public class User {
+public class User implements Serializable {
     @Id
     private Long id;
 
@@ -151,6 +186,13 @@ public class User {
     
     @Column(name = "email", unique = true, nullable = false)
     private String email;
+    
+    @Column(name = "role_id")
+    private Long roleId;
+    
+    // 非持久化字段，用于关联查询
+    @Transient
+    private Role role;
     
     public User() {
     }
@@ -166,6 +208,14 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+    
+    public User(Long id, String username, String password, String email, Long roleId) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.roleId = roleId;
     }
     
     public Long getId() {
@@ -200,9 +250,80 @@ public class User {
         this.email = email;
     }
     
+    public Long getRoleId() {
+        return roleId;
+    }
+    
+    public void setRoleId(Long roleId) {
+        this.roleId = roleId;
+    }
+    
+    public Role getRole() {
+        return role;
+    }
+    
+    public void setRole(Role role) {
+        this.role = role;
+    }
+    
     // 获取格式化的6位数字ID字符串
     public String getFormattedId() {
         return String.format("%06d", id);
+    }
+}
+```
+
+#### Role实体类
+
+```java
+@Entity
+@Table(name = "roles")
+public class Role implements Serializable {
+    @Id
+    private Long id;
+
+    @Column(name = "name", unique = true, nullable = false)
+    private String name;
+
+    @Column(name = "description")
+    private String description;
+
+    public Role() {
+    }
+
+    public Role(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public Role(Long id, String name, String description) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
 ```
@@ -225,11 +346,25 @@ public class User {
 
 提供用户数据的存储和管理服务，包括初始化内置账号、添加用户、通过用户名或ID获取用户、获取所有用户和删除用户。
 
+#### RoleStorage
+
+提供角色数据的存储和管理服务，包括初始化默认角色、添加角色、通过ID或名称获取角色、获取所有角色和删除角色。
+
 ### 7.3 数据访问
 
 #### UserRepository
 
 继承自JpaRepository，提供基本的数据访问方法，如保存用户、根据用户名查找用户、根据邮箱查找用户、根据ID查找用户和获取所有用户。
+
+#### MyBatis Mapper
+
+##### UserMapper
+
+提供用户数据的MyBatis映射接口，包括基本的CRUD操作、动态SQL查询和关联查询方法。
+
+##### RoleMapper
+
+提供角色数据的MyBatis映射接口，包括基本的CRUD操作方法。
 
 ### 7.4 服务类
 
@@ -283,10 +418,25 @@ spring.security.user.password=666666
 spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
 spring.jpa.hibernate.naming.physical-strategy=org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 spring.jpa.hibernate.naming.implicit-strategy=org.hibernate.boot.model.naming.ImplicitNamingStrategyJpaCompliantImpl
-spring.jpa.hibernate.ddl-auto=none
+spring.jpa.hibernate.ddl-auto=update
 ```
 
-### 8.6 邮件配置
+### 8.6 MyBatis配置
+
+```properties
+# MyBatis Configuration
+mybatis.mapper-locations=classpath:mappers/*.xml
+mybatis.type-aliases-package=com.example.loginsystem.model
+mybatis.configuration.map-underscore-to-camel-case=true
+
+# MyBatis Cache Configuration
+mybatis.configuration.cache-enabled=true
+
+# MyBatis Logging
+logging.level.com.example.loginsystem.mapper=debug
+```
+
+### 8.7 邮件配置
 
 ```properties
 # Mail Configuration
@@ -303,7 +453,9 @@ app.email.from=your-email@qq.com
 app.email.subject=Registration Successful
 ```
 
-## 9. 内置账号
+## 9. 内置账号和角色
+
+### 9.1 内置账号
 
 系统启动时会自动初始化一个内置账号：
 
@@ -311,8 +463,21 @@ app.email.subject=Registration Successful
 - 密码：666666
 - 用户ID：1
 - 邮箱：dawn@example.com
+- 角色：ADMIN（管理员）
 
 此账号为系统默认管理员账号，不可删除。
+
+### 9.2 内置角色
+
+系统启动时会自动初始化两个默认角色：
+
+- 角色名称：ADMIN
+- 角色ID：1
+- 角色描述：管理员角色，拥有所有权限
+
+- 角色名称：USER
+- 角色ID：2
+- 角色描述：普通用户角色，拥有基本权限
 
 ## 10. 运行指南
 
@@ -324,7 +489,7 @@ app.email.subject=Registration Successful
 
 ### 10.2 数据库准备
 
-1. 创建数据库：`db_member_center_gldjc`
+1. 创建数据库：`user_db`
 2. 创建用户表：
 
 ```sql
@@ -332,9 +497,22 @@ CREATE TABLE users (
     id BIGINT PRIMARY KEY,
     username VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL
+    email VARCHAR(255) UNIQUE NOT NULL,
+    role_id BIGINT
 );
 ```
+
+3. 创建角色表：
+
+```sql
+CREATE TABLE roles (
+    id BIGINT PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    description VARCHAR(255)
+);
+```
+
+**注意**：如果您在application.properties文件中设置了`spring.jpa.hibernate.ddl-auto=update`，则Hibernate会自动创建或更新数据库表结构，您可以跳过手动创建表的步骤。
 
 ### 10.3 项目运行
 
@@ -463,12 +641,17 @@ public String logout(HttpSession session) {
 
 - 结构清晰：采用分层架构设计，代码组织合理
 - 功能完善：提供用户注册、登录、查询和管理功能
+- 角色管理：支持用户角色分配和管理，内置ADMIN和USER两个默认角色
 - 登录保存：支持"记住我"功能，可设置登录状态的保存时间
 - 智能跳转：根据登录状态自动跳转到相应页面
 - 智能ID管理：用户注销后，新注册用户使用最小的可用ID，保持ID连续排序
 - 邮件通知：用户注册和注销时自动发送邮件通知
 - 安全可靠：内置默认账号，支持用户权限管理
-- 技术先进：使用Spring Boot 3.2.0版本，集成最新技术栈
+- 技术先进：使用Spring Boot 3.2.0版本，集成MyBatis高级特性
+- MyBatis高级特性：
+  - 动态SQL查询：支持根据条件动态生成SQL语句
+  - 二级缓存：配置了基于Mapper级别的二级缓存，提高查询性能
+  - 关联查询：支持用户与角色的关联查询，一次查询获取完整信息
 - 易于扩展：模块化设计，便于功能扩展和维护
 
 该系统可以作为小型应用的用户认证基础，也可以在此基础上扩展更多功能，如用户权限管理、密码重置、邮箱验证等。

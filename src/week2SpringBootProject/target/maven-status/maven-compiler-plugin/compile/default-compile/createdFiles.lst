@@ -1,7 +1,12 @@
 com\example\loginsystem\repository\UserRepository.class
-com\example\loginsystem\controller\UserController.class
 com\example\loginsystem\LoginSystemApplication.class
 com\example\loginsystem\storage\UserStorage.class
 com\example\loginsystem\model\User.class
 com\example\loginsystem\config\SecurityConfig.class
+com\example\loginsystem\mapper\UserMapper.class
+com\example\loginsystem\controller\UserController.class
+com\example\loginsystem\model\Role.class
+com\example\loginsystem\service\EmailService.class
+com\example\loginsystem\mapper\RoleMapper.class
+com\example\loginsystem\storage\RoleStorage.class
 com\example\loginsystem\controller\LoginController.class

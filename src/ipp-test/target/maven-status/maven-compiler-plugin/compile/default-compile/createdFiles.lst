@@ -1,0 +1,5 @@
+com\example\ipptest\domain\IppResourceFieldMapper.class
+com\example\ipptest\controller\IppResourceFieldMapperController.class
+com\example\ipptest\IppTestApplication.class
+com\example\ipptest\mapper\IppResourceFieldMapperMapper.class
+com\example\ipptest\service\IppResourceFieldMapperService.class

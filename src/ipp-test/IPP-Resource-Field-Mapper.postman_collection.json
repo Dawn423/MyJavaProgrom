@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "IPP Resource Field Mapper",
+    "description": "基于 original_str、standard_str、field 的增删改查测试",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "lastId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "查",
+      "item": [
+        {
+          "name": "查全部",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/ipp/resource-field-mapper/all",
+            "description": "返回所有未删除记录"
+          }
+        },
+        {
+          "name": "按 id 查",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/ipp/resource-field-mapper/{{lastId}}",
+            "description": "路径参数 id，可改用 lastId 变量"
+          }
+        },
+        {
+          "name": "按 field 查",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/api/ipp/resource-field-mapper/field/1",
+            "description": "路径参数 field，如 1 或 2"
+          }
+        },
+        {
+          "name": "按 original_str 查",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ipp/resource-field-mapper/by-original?originalStr=公分",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ipp", "resource-field-mapper", "by-original"],
+              "query": [{ "key": "originalStr", "value": "公分" }]
+            },
+            "description": "Query 参数 originalStr"
+          }
+        },
+        {
+          "name": "按 standard_str 查",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/ipp/resource-field-mapper/by-standard?standardStr=cm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "ipp", "resource-field-mapper", "by-standard"],
+              "query": [{ "key": "standardStr", "value": "cm" }]
+            },
+            "description": "Query 参数 standardStr"
+          }
+        }
+      ]
+    },
+    {
+      "name": "增",
+      "item": [
+        {
+          "name": "新增一条",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"originalStr\": \"公顷\",\n  \"standardStr\": \"ha\",\n  \"multiple\": 1,\n  \"field\": 1\n}"
+            },
+            "url": "{{baseUrl}}/api/ipp/resource-field-mapper",
+            "description": "必填: originalStr, standardStr, field"
+          }
+        }
+      ]
+    },
+    {
+      "name": "改",
+      "item": [
+        {
+          "name": "全量更新 PUT",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"originalStr\": \"公顷\",\n  \"standardStr\": \"ha\",\n  \"multiple\": 1,\n  \"field\": 2,\n  \"userName\": \"admin\"\n}"
+            },
+            "url": "{{baseUrl}}/api/ipp/resource-field-mapper",
+            "description": "Body 需带 id，会整体更新"
+          }
+        },
+        {
+          "name": "部分更新 PATCH",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"originalStr\": \"平方千米\",\n  \"standardStr\": \"km2\"\n}"
+            },
+            "url": "{{baseUrl}}/api/ipp/resource-field-mapper",
+            "description": "只更新传入的字段"
+          }
+        }
+      ]
+    },
+    {
+      "name": "删",
+      "item": [
+        {
+          "name": "按 id 软删除",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/api/ipp/resource-field-mapper/1",
+            "description": "路径参数 id，软删除 is_delete=1"
+          }
+        }
+      ]
+    }
+  ]
+}

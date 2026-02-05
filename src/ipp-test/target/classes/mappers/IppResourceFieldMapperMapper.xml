@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.ipptest.mapper.IppResourceFieldMapperMapper">
+    <resultMap id="BaseResultMap" type="com.example.ipptest.domain.IppResourceFieldMapper">
+        <id column="id" jdbcType="BIGINT" property="id"/>
+        <result column="original_str" jdbcType="VARCHAR" property="originalStr"/>
+        <result column="standard_str" jdbcType="VARCHAR" property="standardStr"/>
+        <result column="multiple" jdbcType="INTEGER" property="multiple"/>
+        <result column="field" jdbcType="INTEGER" property="field"/>
+        <result column="is_delete" jdbcType="INTEGER" property="isDelete"/>
+        <result column="user_name" jdbcType="VARCHAR" property="userName"/>
+        <result column="create_at" jdbcType="TIMESTAMP" property="createAt"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, original_str, standard_str, multiple, field, is_delete, user_name, create_at
+    </sql>
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from ipp_resource_field_mapper
+        where id = #{id,jdbcType=BIGINT}
+    </select>
+
+    <select id="selectMaxId" resultType="java.lang.Long">
+        select max(id) from ipp_resource_field_mapper
+    </select>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from ipp_resource_field_mapper
+        where is_delete = 0
+    </select>
+
+    <select id="selectByField" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from ipp_resource_field_mapper
+        where field = #{field,jdbcType=INTEGER}
+        and is_delete = 0
+    </select>
+
+    <select id="selectByOriginalStr" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from ipp_resource_field_mapper
+        where original_str = #{originalStr,jdbcType=VARCHAR}
+        and is_delete = 0
+    </select>
+
+    <select id="selectByStandardStr" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from ipp_resource_field_mapper
+        where standard_str = #{standardStr,jdbcType=VARCHAR}
+        and is_delete = 0
+    </select>
+
+    <select id="selectByKey" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/>
+        from ipp_resource_field_mapper
+        where original_str = #{originalStr,jdbcType=VARCHAR}
+          and standard_str = #{standardStr,jdbcType=VARCHAR}
+          and field = #{field,jdbcType=INTEGER}
+          and is_delete = 0
+        limit 1
+    </select>
+
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        delete from ipp_resource_field_mapper
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <update id="decrementIdsGreaterThan" parameterType="java.lang.Long">
+        update ipp_resource_field_mapper
+        set id = id - 1
+        where id &gt; #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="resetAutoIncrement" parameterType="java.lang.Long">
+        ALTER TABLE ipp_resource_field_mapper AUTO_INCREMENT = #{nextId,jdbcType=BIGINT}
+    </update>
+
+    <insert id="insert" parameterType="com.example.ipptest.domain.IppResourceFieldMapper">
+        insert into ipp_resource_field_mapper (id, original_str, standard_str,
+        multiple, field, is_delete, user_name, create_at)
+        values (#{id,jdbcType=BIGINT}, #{originalStr,jdbcType=VARCHAR}, #{standardStr,jdbcType=VARCHAR},
+        #{multiple,jdbcType=INTEGER}, #{field,jdbcType=INTEGER}, 0, #{userName,jdbcType=VARCHAR},
+        #{createAt,jdbcType=TIMESTAMP})
+    </insert>
+
+    <insert id="insertSelective" parameterType="com.example.ipptest.domain.IppResourceFieldMapper" useGeneratedKeys="true" keyProperty="id">
+        insert into ipp_resource_field_mapper
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="originalStr != null">original_str,</if>
+            <if test="standardStr != null">standard_str,</if>
+            <if test="multiple != null">multiple,</if>
+            <if test="field != null">field,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="createAt != null">create_at,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id,jdbcType=BIGINT},</if>
+            <if test="originalStr != null">#{originalStr,jdbcType=VARCHAR},</if>
+            <if test="standardStr != null">#{standardStr,jdbcType=VARCHAR},</if>
+            <if test="multiple != null">#{multiple,jdbcType=INTEGER},</if>
+            <if test="field != null">#{field,jdbcType=INTEGER},</if>
+            <if test="userName != null">#{userName,jdbcType=VARCHAR},</if>
+            <if test="createAt != null">#{createAt,jdbcType=TIMESTAMP},</if>
+        </trim>
+    </insert>
+
+    <update id="updateByPrimaryKeySelective" parameterType="com.example.ipptest.domain.IppResourceFieldMapper">
+        update ipp_resource_field_mapper
+        <set>
+            <if test="originalStr != null">original_str = #{originalStr,jdbcType=VARCHAR},</if>
+            <if test="standardStr != null">standard_str = #{standardStr,jdbcType=VARCHAR},</if>
+            <if test="multiple != null">multiple = #{multiple,jdbcType=INTEGER},</if>
+            <if test="field != null">field = #{field,jdbcType=INTEGER},</if>
+            <if test="userName != null">user_name = #{userName,jdbcType=VARCHAR},</if>
+            <if test="createAt != null">create_at = #{createAt,jdbcType=TIMESTAMP},</if>
+        </set>
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+    <update id="updateByPrimaryKey" parameterType="com.example.ipptest.domain.IppResourceFieldMapper">
+        update ipp_resource_field_mapper
+        set original_str = #{originalStr,jdbcType=VARCHAR},
+        standard_str = #{standardStr,jdbcType=VARCHAR},
+        multiple = #{multiple,jdbcType=INTEGER},
+        field = #{field,jdbcType=INTEGER},
+        user_name = #{userName,jdbcType=VARCHAR},
+        create_at = #{createAt,jdbcType=TIMESTAMP}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+</mapper>

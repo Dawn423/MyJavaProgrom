@@ -14,7 +14,7 @@ public class EmailService {
     public void sendRegistrationSuccessEmail(String toEmail, String username) {
         try {
             SimpleMailMessage message = new SimpleMailMessage();
-            message.setFrom("x");
+            message.setFrom("xxxxxx");
             message.setTo(toEmail);
             message.setSubject("注册成功 - 欢迎使用我们的服务");
             message.setText("亲爱的 " + username + "，\n\n" +
@@ -22,7 +22,7 @@ public class EmailService {
                     "如果您有任何问题，请随时联系我们。\n\n" +
                     "祝好，\n" +
                     "系统管理员");
-            
+
             mailSender.send(message);
             System.out.println("邮件发送成功：" + toEmail);
         } catch (Exception e) {

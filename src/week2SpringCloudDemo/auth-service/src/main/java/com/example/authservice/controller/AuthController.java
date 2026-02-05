@@ -20,7 +20,7 @@ public class AuthController {
 
     @Autowired
     private UserServiceClient userServiceClient;
-    
+
     @Autowired
     private EmailService emailService;
 
@@ -38,7 +38,7 @@ public class AuthController {
     public String registerForm() {
         return "Please use POST request to register with JSON body containing username, password, and email";
     }
-    
+
     @PostMapping("/register")
     public User register(@RequestBody User user) {
         User createdUser = userServiceClient.createUser(user);
@@ -48,13 +48,13 @@ public class AuthController {
         }
         return createdUser;
     }
-    
+
     @DeleteMapping("/user/{id}")
     public String deleteUser(@PathVariable Long id) {
         userServiceClient.deleteUser(id);
         return "User deleted successfully with ID: " + id;
     }
-    
+
     @DeleteMapping("/user")
     public String deleteUserByUsername(@RequestParam("username") String username) {
         userServiceClient.deleteUserByUsername(username);

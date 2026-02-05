@@ -20,10 +20,10 @@ public interface UserServiceClient {
 
     @PostMapping("/users")
     User createUser(@RequestBody User user);
-    
+
     @DeleteMapping("/users/{id}")
     void deleteUser(@PathVariable("id") Long id);
-    
+
     @DeleteMapping("/users")
     void deleteUserByUsername(@RequestParam("username") String username);
 }
